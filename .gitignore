@@ -180,3 +180,4 @@ cython_debug/
 *.txt
 *.bat
 main.py
+*.xlsx

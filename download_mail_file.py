@@ -1,11 +1,29 @@
 import pandas as pd
+import polars as pl
+from datetime import timedelta
 import os
 
+# Quedarme con la tabla principal
+def get_main_table(df):
+    # Tomar la fila 9 como nombres de columns
+    df.columns = df.iloc[9]
+
+    # Eliminar filas innecesarias
+    df = df.iloc[10:].reset_index(drop=True)
+
+    # Eliminar columnas nan
+    df = df.loc[:, df.columns.notna()]
+
+    # Eliminar columnas unnamed (vacias)
+    df = df.dropna(axis=1, how='all')
+
+    return df
+
 # Descargar archivos del correo
-def download_mail_files(mails, MAIL_ITEM_CODE, project_address, conductores_ralenti):
+def download_mail_file(mails, MAIL_ITEM_CODE, project_address, conductores_ralenti):
     files_found = {} # {
-                     #  9/06/2025: {'transportista': {}, 'ruta': {}},
-                     #  10/06/2025: {'transportista': {}, 'ruta': {}},                     
+                     #  9/06/2025: {'Conductores ralenti': {}},
+                     #  10/06/2025: {'Conductores ralenti': {}},                     
                      # }
 
     for mail in mails:
@@ -13,7 +31,8 @@ def download_mail_files(mails, MAIL_ITEM_CODE, project_address, conductores_rale
             continue
 
         subject_lower = mail.Subject.lower()
-        string_date_mail = mail.ReceivedTime.strftime("%Y-%m-%d")
+        #string_date_mail = mail.ReceivedTime.strftime("%d-%m-%Y")
+        string_date_mail = (mail.ReceivedTime - timedelta(days=1)).strftime("%d-%m-%Y") # Los datos son de una fecha anterior
 
         for attachment in mail.Attachments:
             # Si no es un excel saltar
@@ -23,9 +42,7 @@ def download_mail_files(mails, MAIL_ITEM_CODE, project_address, conductores_rale
             # Si el correo tiene asunto carga diaria o venta perdida
             type_file = None
             sheet_name = None
-            print(conductores_ralenti['mail_subject'].lower())
-            print(subject_lower)
-            print(conductores_ralenti['mail_subject'].lower() in subject_lower)
+            
             if conductores_ralenti['mail_subject'].lower() in subject_lower:
                 type_file = conductores_ralenti['name']
                 sheet_name = conductores_ralenti['mail_sheet_name']
@@ -40,14 +57,14 @@ def download_mail_files(mails, MAIL_ITEM_CODE, project_address, conductores_rale
 
             # Validar contenido
             try:
-                df = pd.read_excel(file_address, sheet_name=sheet_name, header=None)
-                print(df)
-                # df_clean = df.dropna(how='all') # Elminar todos los NaN
-                # if df.empty or df_clean.shape[0] == 0: # Si no hay datos eliminar y saltar
-                #     os.remove(file_address)
-                #     continue
-            except Exception:
-                # os.remove(file_address)
+                df = pd.read_excel(file_address, sheet_name=sheet_name, header=None)                
+                df = get_main_table(df)
+                
+                if df['RECORRIDO.'].sum() == 0: # Si no hay datos eliminar y saltar
+                    os.remove(file_address)
+                    continue
+            except Exception as e:
+                os.remove(file_address)
                 continue
 
             # Guardar archivo para esa fecha
@@ -63,9 +80,9 @@ def download_mail_files(mails, MAIL_ITEM_CODE, project_address, conductores_rale
             # Checar si ya tenemos ambos para esta fecha
             if conductores_ralenti['name'] in files_found[string_date_mail]:
                 datos = files_found[string_date_mail]
-
-                print(f'DATOS: {datos}')
                 
                 return (
-                    datos[conductores_ralenti['name']]['file_address'], datos[conductores_ralenti['name']]['received_time'],                    
+                    df,
+                    datos[conductores_ralenti['name']]['file_address'],
+                    datos[conductores_ralenti['name']]['received_time'],                    
                 )
