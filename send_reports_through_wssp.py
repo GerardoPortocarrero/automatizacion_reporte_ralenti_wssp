@@ -51,7 +51,7 @@ def send_mssg_to_chat(options, page_url, group_name, graphics, date):
                 EC.element_to_be_clickable((By.XPATH, "//button[@title='Adjuntar' and @type='button']"))
             )
             attach_button.click()
-            print(f"\n[✓] Click realizado en el boton de 'Adjuntar'")
+            print(f"[✓] Click realizado en el boton de 'Adjuntar'")
             time.sleep(2)
 
             # Esperar el input para cargar imagen
