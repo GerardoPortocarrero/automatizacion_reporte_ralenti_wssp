@@ -1,6 +1,7 @@
 import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 def barh_graphic_v1(
         df, 
@@ -55,6 +56,7 @@ def barh_graphic_v1(
     plt.show()
 
 def barh_graphic_v2(
+        project_address,
         df, 
         group_by, 
         indicator,
@@ -105,7 +107,9 @@ def barh_graphic_v2(
     # Ajuste para espacio del título
     plt.tight_layout(rect=[0, 0, 1, 0.92])
 
-    # Guardar en alta calidad (opcional)
-    plt.savefig("ralenti.png", dpi=300, bbox_inches='tight', facecolor='white')
+    # Nombre de archivo
+    file_name = f'{group_by}.png'
 
-    plt.show()
+    # Guardar en alta calidad (opcional)
+    plt.savefig(os.path.join(project_address, file_name), dpi=300, bbox_inches='tight', facecolor='white')
+    #plt.show()

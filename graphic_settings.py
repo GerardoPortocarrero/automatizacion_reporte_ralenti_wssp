@@ -13,9 +13,9 @@ def report_configuration(project_address, df, report):
     # CONFIGURACION DE GRAFICO
     group_by = report
     indicator = 'TIEMPO RALENTI.'
-    title = group_by.upper()
 
     myg.barh_graphic_v2(
+        project_address,
         df,
         group_by,
         indicator,
