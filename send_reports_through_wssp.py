@@ -28,9 +28,9 @@ def send_mssg_to_chat(options, page_url, group_name, graphics, date):
         driver.get(page_url)
         print("[*] Esperando a que cargue la página")
 
-        WebDriverWait(driver, 15) # 15 segundos para que se cargue la pagina
-        print("[*] Pagina cargada (15 seg de renderizado) ...")
-        time.sleep(15) # 15 segundos adicionales para renderizado de la pagina
+        WebDriverWait(driver, 10) # 15 segundos para que se cargue la pagina
+        print("[*] Pagina cargada (25 seg de renderizado) ...")
+        time.sleep(25) # 25 segundos adicionales para renderizado de la pagina
 
         # Buscar grupo
         search_box = driver.find_element(By.XPATH, "//div[@contenteditable='true'][@data-tab='3']")
@@ -65,7 +65,7 @@ def send_mssg_to_chat(options, page_url, group_name, graphics, date):
             # Escribir texto junto a la imagen
             caption_box = driver.find_element(By.XPATH, "//div[@contenteditable='true' and @aria-label='Añade un comentario']")
             print(f'[*] Escribiendo mensaje ...')            
-            caption_box.send_keys(f'Buen día. Conductores con más ralentí {date}.')
+            caption_box.send_keys(f'Buen día - Srs. Conductores con más ralentí {date}.')
 
             # Enviar
             send_button = WebDriverWait(driver, 5).until(

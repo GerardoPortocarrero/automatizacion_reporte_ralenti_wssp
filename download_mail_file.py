@@ -59,8 +59,11 @@ def download_mail_file(mails, MAIL_ITEM_CODE, project_address, conductores_ralen
             try:
                 df = pd.read_excel(file_address, sheet_name=sheet_name, header=None)                
                 df = get_main_table(df)
+
+                df['TIEMPO RALENTI SEGUNDOS.'] = pd.to_timedelta(df['TIEMPO RALENTI.'])
+                tiempo_ralenti = int((df['TIEMPO RALENTI SEGUNDOS.'].sum()).total_seconds() // 60)
                 
-                if df['RECORRIDO.'].sum() == 0: # Si no hay datos eliminar y saltar
+                if (df['RECORRIDO.'].sum() == 0) or (tiempo_ralenti == 0): # Si no hay datos eliminar y saltar
                     os.remove(file_address)
                     continue
             except Exception as e:
