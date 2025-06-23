@@ -31,8 +31,8 @@ def download_mail_file(mails, MAIL_ITEM_CODE, project_address, conductores_ralen
             continue
 
         subject_lower = mail.Subject.lower()
-        #string_date_mail = mail.ReceivedTime.strftime("%d-%m-%Y")
-        string_date_mail = (mail.ReceivedTime - timedelta(days=1)).strftime("%d-%m-%Y") # Los datos son de una fecha anterior
+        mail_received_time = mail.ReceivedTime.strftime("%d-%m-%Y")
+        mail_data_time = (mail.ReceivedTime - timedelta(days=1)).strftime("%d-%m-%Y") # Los datos son de una fecha anterior
 
         for attachment in mail.Attachments:
             # Si no es un excel saltar
@@ -71,21 +71,23 @@ def download_mail_file(mails, MAIL_ITEM_CODE, project_address, conductores_ralen
                 continue
 
             # Guardar archivo para esa fecha
-            if string_date_mail not in files_found:
-                files_found[string_date_mail] = {}
+            if mail_received_time not in files_found:
+                files_found[mail_received_time] = {}
 
             # Guardar tipo de archivo en esa fecha
-            files_found[string_date_mail][type_file] = {
+            files_found[mail_received_time][type_file] = {
                 'file_address': file_address,
-                'received_time': string_date_mail
+                'received_time': mail_received_time,
+                'data_time': mail_data_time,
             }
 
             # Checar si ya tenemos ambos para esta fecha
-            if conductores_ralenti['name'] in files_found[string_date_mail]:
-                datos = files_found[string_date_mail]
+            if conductores_ralenti['name'] in files_found[mail_received_time]:
+                datos = files_found[mail_received_time]
                 
                 return (
                     df,
                     datos[conductores_ralenti['name']]['file_address'],
-                    datos[conductores_ralenti['name']]['received_time'],                    
+                    datos[conductores_ralenti['name']]['received_time'],
+                    datos[conductores_ralenti['name']]['data_time'],
                 )
