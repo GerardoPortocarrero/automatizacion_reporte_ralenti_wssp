@@ -2,6 +2,7 @@ import pandas as pd
 import polars as pl
 from datetime import timedelta
 import os
+import numpy as np
 
 # Quedarme con la tabla principal
 def get_main_table(df):
@@ -11,11 +12,22 @@ def get_main_table(df):
     # Eliminar filas innecesarias
     df = df.iloc[10:].reset_index(drop=True)
 
-    # Eliminar columnas nan
-    df = df.loc[:, df.columns.notna()]
+    # Detectar el índice de la primera columna con nombre NaN
+    if df.columns.hasnans:
+        nan_index = df.columns.get_indexer_for([np.nan])[0]
+        df = df.iloc[:, :nan_index]  # Cortar hasta antes del primer NaN
 
-    # Eliminar columnas unnamed (vacias)
+    # También elimina columnas vacías (por si acaso)
     df = df.dropna(axis=1, how='all')
+
+    # Rellenar valores NaN hacia adelante
+    df["LOCACION"] = df["LOCACION"].fillna(method='ffill')
+    
+    # Asegúrate de que no haya espacios y todo esté en mayúsculas
+    df['LOCACION'] = df['LOCACION'].astype(str).str.strip().str.upper()
+    
+    # Filtrar por locacion
+    df = df[df['LOCACION'] == 'PEDREGAL']
 
     return df
 
@@ -67,6 +79,7 @@ def download_mail_file(mails, MAIL_ITEM_CODE, project_address, conductores_ralen
                     os.remove(file_address)
                     continue
             except Exception as e:
+                print(e)
                 os.remove(file_address)
                 continue
 
