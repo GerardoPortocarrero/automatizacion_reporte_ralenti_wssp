@@ -26,11 +26,13 @@ def send_mssg_to_chat(options, page_url, group_name, graphics, date):
         print(f'[*] Abriendo Grupo de WSSP ({group_name})')
 
         driver.get(page_url)
-        print("[*] Esperando a que cargue la página")
+        print("[*] Esperando a que cargue la página...")
 
-        WebDriverWait(driver, 15) # 15 segundos para que se cargue la pagina
-        print("[*] Pagina cargada (25 seg de renderizado) ...")
-        time.sleep(25) # 25 segundos adicionales para renderizado de la pagina
+        # ✅ Esperar hasta que el buscador esté presente (indicador de carga completa)
+        WebDriverWait(driver, 40).until(
+            EC.presence_of_element_located((By.XPATH, "//div[@contenteditable='true'][@data-tab='3']"))
+        )
+        print("[✓] WhatsApp Web cargado correctamente.")
 
         # Buscar grupo
         search_box = driver.find_element(By.XPATH, "//div[@contenteditable='true'][@data-tab='3']")
@@ -40,18 +42,20 @@ def send_mssg_to_chat(options, page_url, group_name, graphics, date):
         time.sleep(3)
 
         # Hacer clic en el grupo
-        clip_button = driver.find_element(By.XPATH, f"//span[@title='{group_name}']")
+        clip_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, f"//span[@title='{group_name}']"))
+        )
         clip_button.click()
         print(f"\n[✓] Click realizado en el grupo: '{group_name}'")
         time.sleep(3)
 
-        for graph_name, graph_address in graphics.items():            
+        for graph_name, graph_address in graphics.items():
             # Esperar hasta que el ícono del clip esté presente y visible            
             attach_button = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, "//button[@title='Adjuntar' and @type='button']"))
             )
             attach_button.click()
-            print(f"[✓] Click realizado en el boton de 'Adjuntar'")
+            print(f"[✓] Click realizado en el botón de 'Adjuntar'")
             time.sleep(2)
 
             # Esperar el input para cargar imagen
@@ -63,12 +67,14 @@ def send_mssg_to_chat(options, page_url, group_name, graphics, date):
             time.sleep(3)
 
             # Escribir texto junto a la imagen
-            caption_box = driver.find_element(By.XPATH, "//div[@contenteditable='true' and @aria-label='Añade un comentario']")
+            caption_box = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//div[@contenteditable='true' and @aria-label='Añade un comentario']"))
+            )
             print(f'[*] Escribiendo mensaje ...')            
             caption_box.send_keys(f'Buen día - Srs. Conductores con más ralentí {date}.')
 
             # Enviar
-            send_button = WebDriverWait(driver, 5).until(
+            send_button = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, "//div[@role='button' and @aria-label='Enviar']"))
             )
             send_button.click()
@@ -80,7 +86,7 @@ def send_mssg_to_chat(options, page_url, group_name, graphics, date):
 
     print("'-----------------------------------------------------------------------'\n")
 
-# Captura de graficos de Power Bi por pagina
+# Captura de gráficos de Power BI por página
 def main(project_address, WSSP_CONFIF, date):
     options = Options()
     options.add_argument("--start-maximized")
