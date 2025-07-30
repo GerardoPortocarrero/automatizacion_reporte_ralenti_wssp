@@ -28,7 +28,7 @@ def send_mssg_to_chat(options, page_url, group_name, graphics, date):
         driver.get(page_url)
         print("[*] Esperando a que cargue la página")
 
-        WebDriverWait(driver, 10) # 15 segundos para que se cargue la pagina
+        WebDriverWait(driver, 15) # 15 segundos para que se cargue la pagina
         print("[*] Pagina cargada (25 seg de renderizado) ...")
         time.sleep(25) # 25 segundos adicionales para renderizado de la pagina
 
